@@ -9,6 +9,9 @@ class BaseKreechin {
     int baseFOC;
     int baseLUK;
 
+    int cat1;
+    int cat2;
+
     int[][] lvlMovepool;
     int[] teachMovepool;
 
@@ -19,7 +22,7 @@ class BaseKreechin {
     int[] possiblePowers;
 
 
-    public BaseKreechin(String nm, int num, int[] stats, int transLvl, int transNum, int[] powers, int teachMoves[], int[][] lvlMoves) {
+    public BaseKreechin(String nm, int num, int[] categories, int[] stats, int transLvl, int transNum, int[] powers, int[] teachMoves, int[][] lvlMoves) {
         name = nm;
         number = num;
         transLevel = transLvl;
@@ -36,17 +39,34 @@ class BaseKreechin {
         baseFOC = stats[5];
         baseLUK = stats[6];
 
-        public String toString() {
-            
+        cat1 = categories[0];
+        if (categories.length == 2) {
+            cat2 = categories[1];
+        } else {
+            cat2 = 0;
         }
+
+    }
+
+    public BaseKreechin(BaseKreechin base) {
+        this(new String(base.name), base.number, new int[]{base.cat1, base.cat2}, new int[]{base.baseHP, base.baseATK, base.baseDEF, base.baseSPD, base.baseEN, base.baseFOC, base.baseLUK}, 
+        base.transLevel, base.transInto, base.possiblePowers, base.teachMovepool, base.lvlMovepool);
+
+    }
+
+    public String toString() {
+        String finalString = name + " - " + number + "\n";
+        finalString += "[" + baseHP + ", " + baseATK + ", " + baseDEF + ", " + baseSPD + ", " + baseEN + ", " + baseFOC + ", " + baseLUK + "]";
+        return finalString;
     }
 }
 
 
 class Kreechin extends BaseKreechin {
     int level;
+    boolean isMale;
     int[] statDeviations = new int[7];
-    int[] moves = new int[4];
+    int[] moves = new int[5];
     int specialPower;
 
     int HP;
@@ -57,5 +77,113 @@ class Kreechin extends BaseKreechin {
     int FOC;
     int LUK;
 
+    int currHP;
     int status;
+
+    public Kreechin(BaseKreechin base, int lvl, boolean gender) {
+        super(base);
+        level = lvl;
+        isMale = gender;
+
+        this.randomizeStats();
+        this.randomizeMoves();
+        specialPower = possiblePowers[(int)(Math.random() * possiblePowers.length)];
+
+        this.fullHeal();
+    }
+
+    public Kreechin(BaseKreechin base, int lvl, boolean gender, int[] statDevs, int[] move, int specialPow, boolean randomStats) {
+        super(base);
+        level = lvl;
+        isMale = gender;
+
+        if (randomStats) {
+            this.randomizeStats();
+        } else {
+            statDeviations = statDevs;
+        }
+        moves = move;
+        specialPower = specialPow;
+
+        this.fullHeal();
+    }
+
+    public void randomizeStats() {
+        if (isMale) {
+            statDeviations[1] += 5;
+            statDeviations[3] += 5;
+            statDeviations[0] -= 5;
+            statDeviations[2] -= 5;
+        } else {
+            statDeviations[0] += 5;
+            statDeviations[2] += 5;
+            statDeviations[1] -= 5;
+            statDeviations[3] -= 5;
+        }
+        statDeviations[(int) (Math.random() * 3) + 4] += 5;
+        statDeviations[(int) (Math.random() * 3) + 4] -= 5;
+        for (int i = -4; i < 5; i++) {
+            if (i != 0) {
+                statDeviations[(int) (Math.random() * 7)] += i;
+            }
+        }
+        int remainingPts = 40;
+        int stat = (int) (Math.random() * 7);
+        while (remainingPts > 0) {
+            stat += (int) (Math.random() * 2);
+            if (stat > 6) {
+                stat -= 7;
+            }
+            if (statDeviations[stat] < 15) {
+                statDeviations[stat]++;
+                remainingPts--;
+            }
+        }
+    }
+
+    public void randomizeMoves() {
+        int slot = 0;
+        for (int i = 0; i < lvlMovepool[0].length; i++) {
+            if (lvlMovepool[0][i] <= level) {
+                moves[slot] = lvlMovepool[1][i];
+                if (i >= 4) {
+                    slot += (int) (Math.random() * 3);
+                } else {
+                    slot++;
+                }
+                if (slot > 4) {
+                    slot -= 5;
+                }
+            } else {
+                break;
+            }
+        }
+        if (Math.random() < 0.5) {
+            moves[4] = 0;
+            if (Math.random() < 0.25) {
+                moves[3] = 0;
+            }
+        } 
+    }
+
+    public void resetStats() {
+        HP = (int) Math.round(2 * (baseHP + statDeviations[0]) + (level / 3));
+        ATK = (int) Math.round((baseATK + statDeviations[1]) + (level / 3));
+        DEF = (int) Math.round((baseDEF + statDeviations[2]) + (level / 3));
+        SPD = (int) Math.round((baseSPD + statDeviations[3]) + (level / 4));
+        EN = (int) Math.round(0.5 * (baseEN + statDeviations[4]) + (level / 4));
+        FOC = (int) Math.round((baseFOC + statDeviations[5]) + (level / 5));
+        LUK = (int) Math.round((baseLUK + statDeviations[6]) + (level / 5));
+
+        System.out.println("[" + HP + ", " + ATK + ", " + DEF + ", " + SPD + ", " + EN + ", " + FOC + ", " + LUK + "]");
+        System.out.println("[" + moves[0] + ", " + moves[1] + ", " + moves[2] + ", " + moves[3] + ", " + moves[4] + "]");
+        System.out.println("Power: " + specialPower);
+    }
+
+    public void fullHeal() {
+        currHP = HP;
+        status = 0;
+        this.resetStats();
+    }
+
 }
