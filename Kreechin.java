@@ -78,6 +78,7 @@ class Kreechin extends BaseKreechin {
     int LUK;
 
     int currHP;
+    int currEN;
     int status;
 
     public Kreechin(BaseKreechin base, int lvl, boolean gender) {
@@ -92,16 +93,22 @@ class Kreechin extends BaseKreechin {
         this.fullHeal();
     }
 
-    public Kreechin(BaseKreechin base, int lvl, boolean gender, int[] statDevs, int[] move, int specialPow, boolean randomStats) {
+    public Kreechin(BaseKreechin base, int lvl, boolean gender, int[] move, int specialPow) {
         super(base);
         level = lvl;
         isMale = gender;
+        moves = move;
+        specialPower = specialPow;
+        this.randomizeStats();
 
-        if (randomStats) {
-            this.randomizeStats();
-        } else {
-            statDeviations = statDevs;
-        }
+        this.fullHeal();
+    }
+
+    public Kreechin(BaseKreechin base, int lvl, boolean gender, int[] move, int specialPow, int[] statDevs) {
+        super(base);
+        level = lvl;
+        isMale = gender;
+        statDeviations = statDevs;
         moves = move;
         specialPower = specialPow;
 
@@ -181,9 +188,64 @@ class Kreechin extends BaseKreechin {
     }
 
     public void fullHeal() {
-        currHP = HP;
         status = 0;
         this.resetStats();
+        currHP = HP;
+        currEN = EN;
+    }
+
+    public void damage(int damage) {
+        currHP -= damage;
+        if (currHP < 0) {
+            currHP = 0;
+        }
+    }
+
+    public String toString() {
+        String gender;
+        if (isMale) {
+            gender = " (M)";
+        } else {
+            gender = " (F)";
+        }
+        String finalString = name + gender + " - Lvl. " + level;
+        finalString += "\nHP: " + currHP + " / " + HP;
+        finalString += "      EN: " + currEN + " / " + EN;
+        finalString += "\n[" + HP + ", " + ATK + ", " + DEF + ", " + SPD + ", " + EN + ", " + FOC + ", " + LUK + "]";
+        switch (status) {
+            case 1:
+                finalString += "\nStatus: Soaked";
+                break;
+            case 2:
+                finalString += "\nStatus: Burned";
+                break;
+            case 3:
+                finalString += "\nStatus: Shocked";
+                break;
+            case 4:
+                finalString += "\nStatus: Frozen";
+                break;
+            case 5:
+                finalString += "\nStatus: Wounded";
+                break;
+            case 6:
+                finalString += "\nStatus: Attracted";
+                break;
+            case 7:
+                finalString += "\nStatus: Suffocating";
+                break;
+            case 8:
+                finalString += "\nStatus: Enchanted";
+                break;
+            case 9:
+                finalString += "\nStatus: Asleep";
+                break;
+            case 10:
+                finalString += "\nStatus: Confused";
+                break;
+        } 
+
+        return finalString;
     }
 
 }
