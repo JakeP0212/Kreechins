@@ -80,6 +80,8 @@ class Kreechin extends BaseKreechin {
     int currHP;
     int currEN;
     int status;
+    int statusTurns;
+    int attractedKreechin;
 
     public Kreechin(BaseKreechin base, int lvl, boolean gender) {
         super(base);
@@ -181,14 +183,12 @@ class Kreechin extends BaseKreechin {
         EN = (int) Math.round(0.5 * (baseEN + statDeviations[4]) + (level / 4));
         FOC = (int) Math.round((baseFOC + statDeviations[5]) + (level / 5));
         LUK = (int) Math.round((baseLUK + statDeviations[6]) + (level / 5));
-
-        System.out.println("[" + HP + ", " + ATK + ", " + DEF + ", " + SPD + ", " + EN + ", " + FOC + ", " + LUK + "]");
-        System.out.println("[" + moves[0] + ", " + moves[1] + ", " + moves[2] + ", " + moves[3] + ", " + moves[4] + "]");
-        System.out.println("Power: " + specialPower);
     }
 
     public void fullHeal() {
         status = 0;
+        statusTurns = 0;
+        attractedKreechin = -10;
         this.resetStats();
         currHP = HP;
         currEN = EN;
@@ -218,7 +218,14 @@ class Kreechin extends BaseKreechin {
     }
 
     public void useEnergy(int energy) {
-        currEN -= energy;
+        if (status != 9) {
+            currEN -= energy;
+            checkHPandEN();
+        }
+    }
+
+    public void gainEnergy(int energy) {
+        currEN += energy;
         checkHPandEN();
     }
 
@@ -276,13 +283,20 @@ class Kreechin extends BaseKreechin {
         return finalString;
     }
 
+    public boolean equals(Kreechin k) {
+        if (name == k.name && number == k.number && level == k.level && isMale == k.isMale) {
+            return true;
+        }
+        return false;
+    }
+
     public boolean accuracyCheck(int accuracy, Kreechin target, boolean userIsPlayer, boolean targetIsPlayer) {
         if (userIsPlayer == targetIsPlayer) {
-            if ((Math.random() * 100) < (accuracy + (FOC / 15.00) -2.20)) {
+            if ((Math.random() * 100) <= (accuracy + (FOC / 15.00) -2.20)) {
                 return true; 
             }
         } else {
-            if ((Math.random() * 100) < (accuracy + ((FOC - target.FOC) / 15.00))) {
+            if ((Math.random() * 100) <= (accuracy + ((FOC - target.FOC) / 15.00))) {
                 return true; 
             }
         }
@@ -294,6 +308,66 @@ class Kreechin extends BaseKreechin {
             return true; 
         }
         return false;
+    }
+
+    public void statChange(int size, int stat) {
+        int increment = 0;
+        String addon = "";
+        if (size == -3) {
+            increment = -16;
+            addon += "decreased significantly!";
+        } else if (size == -2) {
+            increment = -8;
+            addon += "decreased!";
+        } else if (size == -1) {
+            increment = -4;
+            addon += "decreased slightly!";
+        } else if (size == 1) {
+            increment = 4;
+            addon += "increased slightly!";
+        } else if (size == 2) {
+            increment = 8;
+            addon += "increased!";
+        } else if (size == 3) {
+            increment = 16;
+            addon += "increased significantly!";
+        }
+        if (stat == 5) {
+            increment /= 2;
+        }
+        
+        switch (stat) {
+            case 1:
+                HP += increment;
+                System.out.print(name + "'s HP ");
+                break;
+            case 2:
+                ATK += increment;
+                System.out.print(name + "'s Attack ");
+                break;
+            case 3:
+                DEF += increment;
+                System.out.print(name + "'s Defense ");
+                break;
+            case 4:
+                SPD += increment;
+                System.out.print(name + "'s Speed ");
+                break;
+            case 5:
+                EN += increment;
+                System.out.print(name + "'s Energy ");
+                break;
+            case 6:
+                FOC += increment;
+                System.out.print(name + "'s Focus ");
+                break;
+            case 7:
+                LUK += increment;
+                System.out.print(name + "'s Luck ");
+                break;
+        }
+        System.out.println(addon);
+        
     }
 
 }
