@@ -30,6 +30,7 @@ public class Move {
         basePower = 0;
         minHits = 1;
         maxHits = 1;
+        isAttack = false;
     }
 
     public Move(String nm, int category, String target, int enCost, int accuracy, int prior, int[] types, HashMap<String, Integer> effs, int basePwr, int minH, int maxH) {
@@ -37,6 +38,7 @@ public class Move {
         basePower = basePwr;
         minHits = minH;
         maxHits = maxH;
+        isAttack = true;
     }
 
     public String toString() {
