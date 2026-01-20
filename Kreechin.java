@@ -194,11 +194,39 @@ class Kreechin extends BaseKreechin {
         currEN = EN;
     }
 
-    public void damage(int damage) {
-        currHP -= damage;
+    public void checkHPandEN() {
         if (currHP < 0) {
             currHP = 0;
+        } else if (currHP > HP) {
+            currHP = HP;
         }
+        if (currEN < 0) {
+            currEN = 0;
+        } else if (currEN > EN) {
+            currEN = EN;
+        }
+    }
+
+    public void damage(int damage) {
+        currHP -= damage;
+        checkHPandEN();
+    }
+
+    public void heal(int health) {
+        currHP += health;
+        checkHPandEN();
+    }
+
+    public void useEnergy(int energy) {
+        currEN -= energy;
+        checkHPandEN();
+    }
+
+    public boolean isInCat(int category) {
+        if (cat1 == category || cat2 == category) {
+            return true;
+        }
+        return false;
     }
 
     public String toString() {
@@ -246,6 +274,26 @@ class Kreechin extends BaseKreechin {
         } 
 
         return finalString;
+    }
+
+    public boolean accuracyCheck(int accuracy, Kreechin target, boolean userIsPlayer, boolean targetIsPlayer) {
+        if (userIsPlayer == targetIsPlayer) {
+            if ((Math.random() * 100) < (accuracy + (FOC / 15.00) -2.20)) {
+                return true; 
+            }
+        } else {
+            if ((Math.random() * 100) < (accuracy + ((FOC - target.FOC) / 15.00))) {
+                return true; 
+            }
+        }
+        return false;
+    }
+
+    public boolean accuracyCheck(int accuracy) {
+        if ((Math.random() * 100) < (accuracy + (FOC / 15.00) -2.20)) {
+            return true; 
+        }
+        return false;
     }
 
 }
